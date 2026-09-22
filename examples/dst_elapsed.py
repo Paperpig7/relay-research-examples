@@ -12,6 +12,29 @@ def elapsed(start: datetime, end: datetime) -> timedelta:
     return end.astimezone(timezone.utc) - start.astimezone(timezone.utc)
 
 
+def local_time_candidates(wall: datetime, zone: ZoneInfo) -> tuple[datetime, ...]:
+    """Return the distinct UTC instants matching an unzoned local clock reading.
+
+    Zero candidates means a gap, one means ordinary time, and two means a
+    repeated time. Both folds are examined; the input's fold is not a choice.
+    The caller must decide what to do with gaps and repeated times.
+    """
+    if wall.tzinfo is not None:
+        raise ValueError("Pass an unzoned local clock reading")
+    if not isinstance(zone, ZoneInfo):
+        raise TypeError("Pass a ZoneInfo time zone")
+    candidates = set()
+    for fold in (0, 1):
+        local = wall.replace(tzinfo=zone, fold=fold)
+        instant = local.astimezone(timezone.utc)
+        round_trip = instant.astimezone(zone)
+        if round_trip.replace(tzinfo=None) == wall:
+            # Deduplicate UTC instants, not local datetimes: the latter can
+            # compare equal even when fold selects two distinct instants.
+            candidates.add(instant)
+    return tuple(sorted(candidates))
+
+
 def main() -> None:
     ny = ZoneInfo("America/New_York")
     start = datetime(2024, 3, 10, 1, 30, tzinfo=ny)
@@ -23,6 +46,11 @@ def main() -> None:
     late = early.replace(fold=1)
     print(f"Fall wall-clock difference: {(late - early).total_seconds():.0f} seconds")
     print(f"Fall elapsed time in UTC: {elapsed(early, late).total_seconds():.0f} seconds")
+    for label, wall in (
+        ("Missing spring 02:30", datetime(2024, 3, 10, 2, 30)),
+        ("Repeated fall 01:30", datetime(2024, 11, 3, 1, 30)),
+    ):
+        print(f"{label}: {len(local_time_candidates(wall, ny))} UTC candidates")
 
 
 if __name__ == "__main__":

@@ -10,6 +10,8 @@ Each example includes a worked explanation, tests, primary references, and a lin
 | Does 4% annualized GDP growth mean 4% in one quarter? | [GDP annualization](docs/gdp-annualization.md) | `python3 -m examples.gdp_annualization` | [GDP discussion](https://relay-commons.ericx.workers.dev/t/fce574a8-ac3c-453a-bd06-ac65bcdce4fd) |
 | Why did `WHERE value <> 7` drop the missing values? | [SQL NULL filters](docs/sql-null-filters.md) | `python3 -m examples.sql_null` | [Exact SQL reply](https://relay-commons.ericx.workers.dev/t/host-open-conversation?reply=f5b3e897-8765-4020-9d7b-ab452bd57307#post-f5b3e897-8765-4020-9d7b-ab452bd57307) |
 
+The worked cases now include validating missing and repeated local times (including 30-minute transitions), `NOT IN` versus `NOT EXISTS` with nullable exclusions, and GDP annual-average growth versus Q4-over-Q4 growth. The 38 regression tests cover the boundary cases; each explanation ends with a small follow-up challenge and explicit expected outcomes or invariants.
+
 ## Run the tests
 
 Use Python 3.9 or newer with its standard-library `sqlite3` module:

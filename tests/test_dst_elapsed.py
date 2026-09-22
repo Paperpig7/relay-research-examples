@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, timedelta, timezone, tzinfo
 from zoneinfo import ZoneInfo
 
-from examples.dst_elapsed import elapsed
+from examples.dst_elapsed import elapsed, local_time_candidates
 
 
 class NoOffset(tzinfo):
@@ -53,6 +53,46 @@ class ElapsedTests(unittest.TestCase):
         missing = datetime(2024, 3, 10, 2, 30, tzinfo=self.ny)
         round_trip = missing.astimezone(timezone.utc).astimezone(self.ny)
         self.assertNotEqual(round_trip.replace(tzinfo=None), missing.replace(tzinfo=None))
+
+
+class LocalTimeCandidateTests(unittest.TestCase):
+    def test_gap_has_no_candidate_for_either_input_fold(self):
+        for fold in (0, 1):
+            wall = datetime(2024, 3, 10, 2, 30, fold=fold)
+            self.assertEqual(local_time_candidates(wall, ZoneInfo("America/New_York")), ())
+
+    def test_fold_returns_two_exact_instants_not_equal_local_labels(self):
+        result = local_time_candidates(datetime(2024, 11, 3, 1, 30), ZoneInfo("America/New_York"))
+        self.assertEqual(result, (
+            datetime(2024, 11, 3, 5, 30, tzinfo=timezone.utc),
+            datetime(2024, 11, 3, 6, 30, tzinfo=timezone.utc),
+        ))
+        self.assertEqual([instant.astimezone(ZoneInfo("America/New_York")).fold for instant in result], [0, 1])
+
+    def test_ordinary_time_is_deduplicated(self):
+        self.assertEqual(
+            local_time_candidates(datetime(2024, 1, 15, 12), ZoneInfo("America/New_York")),
+            (datetime(2024, 1, 15, 17, tzinfo=timezone.utc),),
+        )
+
+    def test_lord_howe_fold_is_thirty_minutes_not_one_hour(self):
+        result = local_time_candidates(datetime(2024, 4, 7, 1, 45), ZoneInfo("Australia/Lord_Howe"))
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[1] - result[0], timedelta(minutes=30))
+
+    def test_lord_howe_thirty_minute_gap(self):
+        zone = ZoneInfo("Australia/Lord_Howe")
+        self.assertEqual(local_time_candidates(datetime(2024, 10, 6, 2, 15), zone), ())
+        self.assertEqual(len(local_time_candidates(datetime(2024, 10, 6, 2, 30), zone)), 1)
+
+    def test_apia_skipped_entire_day(self):
+        self.assertEqual(local_time_candidates(datetime(2011, 12, 30, 12), ZoneInfo("Pacific/Apia")), ())
+
+    def test_aware_clock_input_and_non_zoneinfo_are_rejected(self):
+        with self.assertRaises(ValueError):
+            local_time_candidates(datetime(2024, 1, 1, tzinfo=timezone.utc), ZoneInfo("UTC"))
+        with self.assertRaises(TypeError):
+            local_time_candidates(datetime(2024, 1, 1), timezone.utc)
 
 
 if __name__ == "__main__":

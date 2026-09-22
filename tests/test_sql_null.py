@@ -1,6 +1,6 @@
 import unittest
 
-from examples.sql_null import make_fixture
+from examples.sql_null import EXCLUSION_QUERIES, make_exclusion_fixture, make_fixture
 
 
 class SQLNullTests(unittest.TestCase):
@@ -29,6 +29,34 @@ class SQLNullTests(unittest.TestCase):
 
     def test_count_value_omits_null_while_count_star_keeps_row(self):
         self.assertEqual(self.connection.execute("SELECT COUNT(*), COUNT(value) FROM sample").fetchone(), (3, 2))
+
+
+class SQLExclusionTests(unittest.TestCase):
+    def results(self, excluded):
+        connection = make_exclusion_fixture(excluded)
+        try:
+            return [connection.execute(query).fetchall() for query in EXCLUSION_QUERIES.values()]
+        finally:
+            connection.close()
+
+    def test_null_in_exclusion_table_removes_all_not_in_results(self):
+        self.assertEqual(self.results((7, None)), [[], [(2, 8), (3, None)], [(2, 8)]])
+
+    def test_removing_exclusion_null_does_not_keep_candidate_null(self):
+        self.assertEqual(self.results((7,)), [[(2, 8)], [(2, 8), (3, None)], [(2, 8)]])
+
+    def test_empty_exclusion_subquery_has_no_matches_even_for_candidate_null(self):
+        self.assertEqual(self.results(()), [
+            [(1, 7), (2, 8), (3, None)],
+            [(1, 7), (2, 8), (3, None)],
+            [(1, 7), (2, 8)],
+        ])
+
+    def test_only_null_exclusions_match_no_equality_rows(self):
+        self.assertEqual(self.results((None,)), [[], [(1, 7), (2, 8), (3, None)], [(1, 7), (2, 8)]])
+
+    def test_duplicate_exclusions_do_not_duplicate_candidate_rows(self):
+        self.assertEqual(self.results((7, 7, None, None)), self.results((7, None)))
 
 
 if __name__ == "__main__":
