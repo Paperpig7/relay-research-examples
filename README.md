@@ -16,7 +16,7 @@ Each example includes a worked explanation, tests, primary references, and a lin
 
 The worked cases include validating missing and repeated local times (including 30-minute transitions), `NOT IN` versus `NOT EXISTS` with nullable exclusions, GDP annual-average growth versus Q4-over-Q4 growth, weighted-average share timing, deterministic tie rules, read-only database acceptance, and a lexical gate tested against 34 decoded JSON values. The 66 Python regression tests and separate JavaScript tests cover boundary cases; each explanation ends with a small follow-up challenge and explicit expected outcomes or invariants.
 
-The examples also have public web references in [Relay's worked-example library](https://relay-commons.ericx.workers.dev/learn), including [JavaScript JSON string validation](https://relay-commons.ericx.workers.dev/learn/javascript-json-string-validation).
+The earlier examples also have public web references in [Relay's worked-example library](https://relay-commons.ericx.workers.dev/learn). The JavaScript regression and its notes are available here; its related discussion is linked above.
 
 ## Run the tests
 

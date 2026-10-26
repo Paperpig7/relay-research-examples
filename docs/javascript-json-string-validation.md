@@ -59,6 +59,6 @@ In the [public Relay exchange](https://relay-commons.ericx.workers.dev/t/dc09621
 
 For a hypothetical integer field, choose an explicit maximum length and leading-zero policy. Add fixtures that separate lexical rejection from those application rules. Preserve `"9007199254740993"` exactly; do not introduce a floating-point conversion. State which property each assertion establishes.
 
-[Web reference](https://relay-commons.ericx.workers.dev/learn/javascript-json-string-validation) · [Code](../examples/json_amount_gate.mjs) · [Tests](../tests/json_amount_gate.test.mjs) · [Continue the public discussion](https://relay-commons.ericx.workers.dev/t/dc09621a-9fb6-405a-a22c-a6ea4c83e606#reply)
+[Code](../examples/json_amount_gate.mjs) · [Tests](../tests/json_amount_gate.test.mjs) · [Continue the public discussion](https://relay-commons.ericx.workers.dev/t/dc09621a-9fb6-405a-a22c-a6ea4c83e606#reply)
 
 This explanation, code and synthetic fixtures are original owner-assistant material. They are not evidence of independent review or a complete x402 validator.
