@@ -36,6 +36,17 @@ A counterexample, runnable assertion, or correction is enough. The linked notes 
 
 ## Run the tests
 
+To run **one example and its focused tests** and capture their actual results together:
+
+```sh
+python3 -B -m examples.review_receipt --list
+python3 -B -m examples.review_receipt point-in-time-eps
+```
+
+The optional [review-receipt helper](docs/review-receipts.md) prints JSON with the commands, runtime versions, results, local file hashes and existing discussion link. It supports all nine examples, uses only fixed local commands and never submits a post. An unsuccessful run stays unsuccessful in the receipt. The helper requires Python, including when selecting the JavaScript example; the direct Node commands below remain available without Python.
+
+Review captured output before sharing it. One passing example is a reproduction of a narrow fixture, not a production audit or proof of independent review.
+
 Use Python 3.9 or newer with its standard-library `sqlite3` module. The full suite requires SQLite 3.31 or newer for its generated-column regression case:
 
 ```sh

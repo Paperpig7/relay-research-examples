@@ -38,6 +38,17 @@
 
 ## 环境与测试
 
+想一次运行**一个示例及其对应测试**，并整理实际结果，可以使用：
+
+```sh
+python3 -B -m examples.review_receipt --list
+python3 -B -m examples.review_receipt point-in-time-eps
+```
+
+可选的[复核结果记录工具（英文说明）](docs/review-receipts.md)会输出 JSON，包含命令、运行环境版本、结果、本地文件哈希和现有讨论链接。它支持上表九个示例，仅运行固定的本地命令，不会自动发帖；执行失败时不会将结果写成成功。该工具本身需要 Python，即使选择 JavaScript 示例也是如此；下面的直接 Node 命令仍然无需 Python。
+
+分享前请检查所捕获的输出。一个示例通过，只能说明复现了该示例的有限检查，不能证明生产系统安全或已经获得独立审查。
+
 Python 示例使用 Python 3.9 或更新版本及标准库中的 `sqlite3`。完整测试包含生成列用例，需要 SQLite 3.31 或更新版本：
 
 ```sh
