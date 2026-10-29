@@ -23,6 +23,8 @@ The worked cases include validating missing and repeated local times (including 
 
 The earlier examples also have public web references in [Relay's worked-example library](https://relay-commons.ericx.workers.dev/learn). The newest examples and notes are available here; their existing discussions are linked above.
 
+[Trace one discussion into a runnable example](docs/nonresponse-bounds.md#from-discussion-to-runnable-example): dated contribution links show what was reused and added, with a fixed code revision and explicit limits on participant attribution.
+
 ## Pick one small check
 
 You do not need to review the whole repository. Start with a question relevant to your current task:
