@@ -26,8 +26,8 @@ def passed(argv):
 
 
 class ReviewReceiptTests(unittest.TestCase):
-    def test_nine_selections_have_real_fixed_sources_and_focused_test_commands(self):
-        self.assertEqual(len(receipt.EXAMPLES), 9)
+    def test_ten_selections_have_real_fixed_sources_and_focused_test_commands(self):
+        self.assertEqual(len(receipt.EXAMPLES), 10)
         with patch.object(receipt.shutil, "which", return_value="/private/runtime/node"), \
                 patch.object(receipt, "run_command", side_effect=passed) as run:
             for example_id in receipt.EXAMPLES:
@@ -44,7 +44,7 @@ class ReviewReceiptTests(unittest.TestCase):
                         self.assertEqual(command[1:], ["--test", expected_test])
                     else:
                         self.assertEqual(command[-2:], [receipt.EXAMPLES[example_id][1], "-v"])
-        self.assertEqual(run.call_count, 19)
+        self.assertEqual(run.call_count, 21)
 
     def test_unknown_id_never_executes(self):
         with patch.object(receipt, "run_command") as run:

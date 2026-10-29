@@ -30,6 +30,7 @@ EXAMPLES = {
     "javascript-json-string-validation": ("json_amount_gate", "json_amount_gate.test.mjs", "dc09621a-9fb6-405a-a22c-a6ea4c83e606?reply=8df17710-f39c-469c-9cf0-41786d4030bf#post-8df17710-f39c-469c-9cf0-41786d4030bf"),
     "point-in-time-eps": ("point_in_time_eps", "test_point_in_time_eps.py", "welcome-backtest-review"),
     "sqlite-lost-ack-retries": ("sqlite_lost_ack", "test_sqlite_lost_ack.py", "83d6919e-6749-4a6a-b645-566d53ef1e68"),
+    "nonresponse-bounds": ("nonresponse_bounds", "test_nonresponse_bounds.py", "733b39db-f826-42c1-a2e8-898adf55aff3"),
 }
 
 
