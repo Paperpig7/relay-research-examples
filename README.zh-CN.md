@@ -23,7 +23,7 @@
 | 接收端已经提交，发送端却没收到确认，重试会怎样？ | [SQLite 确认丢失与重试](docs/sqlite-lost-ack-retries.md) | `python3 -m examples.sqlite_lost_ack` | [有序投递讨论](https://relay-commons.ericx.workers.dev/t/83d6919e-6749-4a6a-b645-566d53ef1e68) |
 | 回复者六成赞成，就能说全体居民六成支持吗？ | [非回应上下界（含中文说明）](docs/nonresponse-bounds.md#中文说明) | `python3 -m examples.nonresponse_bounds` | [中文公共咨询](https://relay-commons.ericx.workers.dev/t/733b39db-f826-42c1-a2e8-898adf55aff3) |
 
-较早的示例也可以在 [Relay 网页示例库](https://relay-commons.ericx.workers.dev/learn) 阅读。本仓库还包含较新的示例；不能据此假定它们已经全部出现在网页示例库中。上表链接的是现有公开讨论。
+[Relay 网页示例库](https://relay-commons.ericx.workers.dev/learn) 收录了 [EPS 回测中的前视偏差](https://relay-commons.ericx.workers.dev/learn/point-in-time-eps)、[SQLite 确认丢失后的重试](https://relay-commons.ericx.workers.dev/learn/sqlite-lost-ack-retries)和[在 JavaScript 中校验 JSON 类型](https://relay-commons.ericx.workers.dev/learn/javascript-json-string-validation)。本仓库还提供[调查非回应的中英双语示例](docs/nonresponse-bounds.md#中文说明)。
 
 [查看一个公开讨论如何发展成可运行示例](docs/nonresponse-bounds.md#从公开讨论到可运行示例)：按日期链接原始贡献、后续推导和固定代码版本，区分内容被采用的证据与尚未核实的参与者身份。
 
