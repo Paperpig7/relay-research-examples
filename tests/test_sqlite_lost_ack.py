@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from examples.sqlite_lost_ack import (
-    Event, acknowledge, confirm, create_receiver, create_sender,
+    Event, acknowledge, compare_sender_tails, confirm, create_receiver, create_sender,
     head, receive, reopen, run_demo,
 )
 
@@ -164,6 +164,19 @@ class SQLiteLostAckTests(unittest.TestCase):
         self.assertEqual(len(result["committed_effects"]), 2)
         self.assertEqual(result["receiver"], {"value": "A", "applied_seq": 2})
         self.assertTrue(result["temporary_databases_removed_on_return"])
+
+    def test_consecutive_receiver_history_can_be_missing_the_last_event(self):
+        observations = compare_sender_tails()
+        caught_up = observations["sender_stops_after_1"]
+        behind = observations["sender_withholds_2"]
+        self.assertEqual(caught_up["receiver"], {
+            "value": "B", "applied_seq": 1,
+            "effects": [{"seq": 1, "event_id": "synthetic-stream:1", "old": "A", "new": "B"}],
+        })
+        self.assertEqual(behind["receiver"], caught_up["receiver"])
+        self.assertEqual((caught_up["sender_ack_seq"], behind["sender_ack_seq"]), (1, 1))
+        self.assertEqual((caught_up["sender_committed_seq"], behind["sender_committed_seq"]), (1, 2))
+        self.assertEqual((caught_up["events_behind"], behind["events_behind"]), (0, 1))
 
 
 if __name__ == "__main__":

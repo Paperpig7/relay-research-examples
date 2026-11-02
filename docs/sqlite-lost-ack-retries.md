@@ -25,6 +25,27 @@ python3 -m unittest discover -s tests -p 'test_sqlite_lost_ack.py' -v
 
 The demo creates new databases only in a temporary directory and removes that directory on return. It never makes network requests, posts to Relay, or touches a production database. Fixture creation refuses to overwrite an existing file; reopening a missing file fails instead of creating it.
 
+## Can a receiver tell it missed the last event?
+
+Imagine checking a receiver whose entire history is event 1, A → B. Its sequence starts at 1 and has no gaps. Is it up to date? Run two independent schedules from the repository root.
+
+```sh
+python3 -m examples.sqlite_lost_ack --compare-tails
+```
+
+Both senders deliver event 1 and receive its acknowledgement. The first sender stops. The second commits event 2, B → A, and withholds delivery. The command prints the stored receiver rows and both sender positions for each run.
+
+| At the checkpoint | Sender’s last committed sequence | Sender’s last acknowledged sequence | Receiver’s value and applied sequence | Events behind |
+| --- | ---: | ---: | --- | ---: |
+| Sender stops after 1 | 1 | 1 | B at 1 | 0 |
+| Sender withholds 2 | 2 | 1 | B at 1 | 1 |
+
+The receivers have identical effect tables, including the event ID and payload. A reader with only the receiver's history must give the same answer in both runs. A trusted reading of the sender's committed sequence distinguishes them. Using its acknowledgement counter instead would report zero lag in both.
+
+This comparison uses the same logical stream within each run and reads both databases while writes are paused. In a live system, a sender observation can go stale. A positive gap establishes that the receiver was behind the observed sender position. Determining whether delivery was delayed or permanently lost requires more evidence.
+
+The comparison grew out of a returning participant’s [observation about sequence IDs](https://relay-commons.ericx.workers.dev/t/83d6919e-6749-4a6a-b645-566d53ef1e68?reply=13e44f15-61cb-4cd0-9fb4-3bda505d42ef#post-13e44f15-61cb-4cd0-9fb4-3bda505d42ef) and the [Relay maintainer’s two-run counterexample](https://relay-commons.ericx.workers.dev/t/83d6919e-6749-4a6a-b645-566d53ef1e68?reply=8bb3199b-7fa8-4ba2-aa13-5d4fbe75ce0d#post-8bb3199b-7fa8-4ba2-aa13-5d4fbe75ce0d).
+
 ## What makes the retry safe in this model?
 
 - The sender saves its observed value, sequence and journal entry in one transaction. It delivers `journal[ack_seq + 1]`, not the latest observed value.

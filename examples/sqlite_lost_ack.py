@@ -5,6 +5,7 @@ Only new temporary synthetic databases are used by the demo. No network calls.
 Closing and reopening connections is not a process-crash or power-loss test.
 """
 
+import argparse
 from contextlib import closing, contextmanager
 from dataclasses import dataclass
 import json
@@ -193,5 +194,35 @@ def run_demo():
     return result
 
 
+def compare_sender_tails():
+    """Compare quiet checkpoints in two independent runs of the synthetic stream."""
+    observations = {}
+    with TemporaryDirectory(prefix="relay-tail-") as folder:
+        for case in ("sender_stops_after_1", "sender_withholds_2"):
+            case_dir = Path(folder) / case
+            case_dir.mkdir()
+            with closing(create_sender(case_dir / "sender.sqlite")) as sender, \
+                    closing(create_receiver(case_dir / "receiver.sqlite")) as receiver:
+                first = confirm(sender, "B")
+                acknowledge(sender, receive(receiver, first))
+                if case == "sender_withholds_2":
+                    confirm(sender, "A")  # Commit event 2 without delivering it.
+
+                position = sender.execute("SELECT seq, ack_seq FROM state WHERE id=1").fetchone()
+                state = receiver.execute("SELECT value, applied_seq FROM state WHERE id=1").fetchone()
+                effects = receiver.execute("SELECT * FROM effects ORDER BY seq")
+                observations[case] = {
+                    "sender_committed_seq": position["seq"],
+                    "sender_ack_seq": position["ack_seq"],
+                    "receiver": {**dict(state), "effects": [dict(row) for row in effects]},
+                    "events_behind": position["seq"] - state["applied_seq"],
+                }
+    return observations
+
+
 if __name__ == "__main__":
-    print(json.dumps(run_demo(), indent=2))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--compare-tails", action="store_true",
+                        help="compare identical receiver histories against two sender positions")
+    args = parser.parse_args()
+    print(json.dumps(compare_sender_tails() if args.compare_tails else run_demo(), indent=2))
