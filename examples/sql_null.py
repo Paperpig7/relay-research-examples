@@ -4,8 +4,7 @@ import sqlite3
 from typing import Optional, Sequence
 
 
-# Fixed educational queries. Each policy deliberately treats candidate NULLs
-# differently; neither is a universal replacement for NOT IN.
+# Fixed educational queries for different policies on candidate NULLs.
 EXCLUSION_QUERIES = {
     "NOT IN": "SELECT id, value FROM sample WHERE value NOT IN (SELECT value FROM excluded) ORDER BY id",
     "NOT EXISTS, keep missing candidates": """
@@ -17,6 +16,11 @@ EXCLUSION_QUERIES = {
         SELECT s.id, s.value FROM sample AS s
         WHERE s.value IS NOT NULL
           AND NOT EXISTS (SELECT 1 FROM excluded AS e WHERE e.value = s.value)
+        ORDER BY s.id
+    """,
+    "NOT EXISTS, missing equals missing": """
+        SELECT s.id, s.value FROM sample AS s
+        WHERE NOT EXISTS (SELECT 1 FROM excluded AS e WHERE e.value IS s.value)
         ORDER BY s.id
     """,
 }

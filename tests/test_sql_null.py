@@ -40,23 +40,39 @@ class SQLExclusionTests(unittest.TestCase):
             connection.close()
 
     def test_null_in_exclusion_table_removes_all_not_in_results(self):
-        self.assertEqual(self.results((7, None)), [[], [(2, 8), (3, None)], [(2, 8)]])
+        self.assertEqual(self.results((7, None)), [[], [(2, 8), (3, None)], [(2, 8)], [(2, 8)]])
 
     def test_removing_exclusion_null_does_not_keep_candidate_null(self):
-        self.assertEqual(self.results((7,)), [[(2, 8)], [(2, 8), (3, None)], [(2, 8)]])
+        self.assertEqual(self.results((7,)), [
+            [(2, 8)], [(2, 8), (3, None)], [(2, 8)], [(2, 8), (3, None)],
+        ])
 
     def test_empty_exclusion_subquery_has_no_matches_even_for_candidate_null(self):
         self.assertEqual(self.results(()), [
             [(1, 7), (2, 8), (3, None)],
             [(1, 7), (2, 8), (3, None)],
             [(1, 7), (2, 8)],
+            [(1, 7), (2, 8), (3, None)],
         ])
 
     def test_only_null_exclusions_match_no_equality_rows(self):
-        self.assertEqual(self.results((None,)), [[], [(1, 7), (2, 8), (3, None)], [(1, 7), (2, 8)]])
+        self.assertEqual(self.results((None,)), [
+            [], [(1, 7), (2, 8), (3, None)], [(1, 7), (2, 8)], [(1, 7), (2, 8)],
+        ])
 
     def test_duplicate_exclusions_do_not_duplicate_candidate_rows(self):
         self.assertEqual(self.results((7, 7, None, None)), self.results((7, None)))
+
+    def test_null_safe_exclusion_preserves_each_surviving_candidate_id(self):
+        connection = make_exclusion_fixture((7, 7, None, None))
+        try:
+            connection.executemany("INSERT INTO sample VALUES (?, ?)", [(4, 8), (5, None)])
+            query = EXCLUSION_QUERIES["NOT EXISTS, missing equals missing"]
+            self.assertEqual(connection.execute(query).fetchall(), [(2, 8), (4, 8)])
+            connection.execute("DELETE FROM excluded WHERE value IS NULL")
+            self.assertEqual(connection.execute(query).fetchall(), [(2, 8), (3, None), (4, 8), (5, None)])
+        finally:
+            connection.close()
 
 
 if __name__ == "__main__":
