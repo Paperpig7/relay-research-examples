@@ -18,6 +18,7 @@ Each example includes a worked explanation, tests, primary references, and a lin
 | Could a future earnings amendment change a past backtest decision? | [Point-in-time EPS](docs/point-in-time-eps.md) | `python3 -m examples.point_in_time_eps` | [Public backtest review](https://relay-commons.ericx.workers.dev/t/welcome-backtest-review) |
 | What if the receiver commits but its acknowledgement is lost? | [SQLite lost-ack retries](docs/sqlite-lost-ack-retries.md) | `python3 -m examples.sqlite_lost_ack` | [Ordered-delivery discussion](https://relay-commons.ericx.workers.dev/t/83d6919e-6749-4a6a-b645-566d53ef1e68) |
 | Does 60% of respondents mean 60% of the population? | [Nonresponse bounds · 非回应上下界](docs/nonresponse-bounds.md) | `python3 -m examples.nonresponse_bounds` | [Chinese public consultation](https://relay-commons.ericx.workers.dev/t/733b39db-f826-42c1-a2e8-898adf55aff3) |
+| Can SQLite store and rank adjacent scores above JavaScript’s safe integer limit? | [Exact integer scores in SQLite](docs/sqlite-integer-scores.md) | `python3 -m examples.sqlite_integer_scores` | [Signed 64-bit boundary discussion](https://relay-commons.ericx.workers.dev/t/5eb4d591-6901-47f0-83ce-cb8b0f9ad6b8?reply=60fa09dd-375f-4251-82e6-36efd9583993#post-60fa09dd-375f-4251-82e6-36efd9583993) |
 
 The worked cases include validating missing and repeated local times (including 30-minute transitions), `NOT IN` versus `NOT EXISTS` with nullable exclusions, GDP annual-average growth versus Q4-over-Q4 growth, weighted-average share timing, future-amendment isolation, deterministic tie rules, read-only database acceptance, ordered retry after a lost acknowledgement, a lexical gate tested against 34 decoded JSON values, and exact nonresponse bounds distinguished from sampling confidence intervals. Python and JavaScript regression tests cover boundary cases; each explanation ends with a small follow-up challenge and explicit expected outcomes or invariants.
 
@@ -47,7 +48,7 @@ python3 -B -m examples.review_receipt --list
 python3 -B -m examples.review_receipt point-in-time-eps
 ```
 
-The optional [review-receipt helper](docs/review-receipts.md) prints JSON with the commands, runtime versions, results, local file hashes and existing discussion link. It supports all ten examples, uses only fixed local commands and never submits a post. An unsuccessful run stays unsuccessful in the receipt. The helper requires Python, including when selecting the JavaScript example; the direct Node commands below remain available without Python.
+The optional [review-receipt helper](docs/review-receipts.md) prints JSON with the commands, runtime versions, results, local file hashes and existing discussion link. It supports every example in the table, uses only fixed local commands and never submits a post. An unsuccessful run stays unsuccessful in the receipt. The helper requires Python, including when selecting the JavaScript example; the direct Node commands below remain available without Python.
 
 Review captured output before sharing it. One passing example is a reproduction of a narrow fixture, not a production audit or proof of independent review.
 

@@ -3,6 +3,7 @@ import io
 import json
 from pathlib import Path
 import shutil
+import sqlite3
 import sys
 from tempfile import TemporaryDirectory
 import unittest
@@ -26,8 +27,8 @@ def passed(argv):
 
 
 class ReviewReceiptTests(unittest.TestCase):
-    def test_ten_selections_have_real_fixed_sources_and_focused_test_commands(self):
-        self.assertEqual(len(receipt.EXAMPLES), 10)
+    def test_selections_have_real_fixed_sources_and_focused_test_commands(self):
+        self.assertEqual(len(receipt.EXAMPLES), 11)
         with patch.object(receipt.shutil, "which", return_value="/private/runtime/node"), \
                 patch.object(receipt, "run_command", side_effect=passed) as run:
             for example_id in receipt.EXAMPLES:
@@ -38,13 +39,15 @@ class ReviewReceiptTests(unittest.TestCase):
                     self.assertEqual(len(result["local_file_sha256"]), 2)
                     self.assertTrue(all(len(digest) == 64 for digest in result["local_file_sha256"].values()))
                     self.assertTrue(result["discussion_url"].startswith(receipt.BASE))
+                    if example_id == "sql-null-filters" or example_id.startswith("sqlite-"):
+                        self.assertEqual(result["runtime_versions"]["sqlite"], sqlite3.sqlite_version)
                     command = result["commands"][1]["argv"]
                     expected_test = "tests/" + receipt.EXAMPLES[example_id][1]
                     if example_id.startswith("javascript"):
                         self.assertEqual(command[1:], ["--test", expected_test])
                     else:
                         self.assertEqual(command[-2:], [receipt.EXAMPLES[example_id][1], "-v"])
-        self.assertEqual(run.call_count, 21)
+        self.assertEqual(run.call_count, 2 * len(receipt.EXAMPLES) + 1)  # One extra Node version probe.
 
     def test_unknown_id_never_executes(self):
         with patch.object(receipt, "run_command") as run:
