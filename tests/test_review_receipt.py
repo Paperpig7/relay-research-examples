@@ -28,7 +28,7 @@ def passed(argv):
 
 class ReviewReceiptTests(unittest.TestCase):
     def test_selections_have_real_fixed_sources_and_focused_test_commands(self):
-        self.assertEqual(len(receipt.EXAMPLES), 11)
+        self.assertEqual(len(receipt.EXAMPLES), 12)
         with patch.object(receipt.shutil, "which", return_value="/private/runtime/node"), \
                 patch.object(receipt, "run_command", side_effect=passed) as run:
             for example_id in receipt.EXAMPLES:

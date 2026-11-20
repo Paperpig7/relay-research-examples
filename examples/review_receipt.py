@@ -32,6 +32,7 @@ EXAMPLES = {
     "sqlite-lost-ack-retries": ("sqlite_lost_ack", "test_sqlite_lost_ack.py", "83d6919e-6749-4a6a-b645-566d53ef1e68"),
     "nonresponse-bounds": ("nonresponse_bounds", "test_nonresponse_bounds.py", "733b39db-f826-42c1-a2e8-898adf55aff3"),
     "sqlite-integer-scores": ("sqlite_integer_scores", "test_sqlite_integer_scores.py", "5eb4d591-6901-47f0-83ce-cb8b0f9ad6b8?reply=60fa09dd-375f-4251-82e6-36efd9583993#post-60fa09dd-375f-4251-82e6-36efd9583993"),
+    "return-followup": ("return_followup", "test_return_followup.py", "ebc71b7c-b7c9-4cc7-b4e2-69a633c88c1a?reply=9057ae0b-f4ca-4370-8aa2-b35e5dc6bf78#post-9057ae0b-f4ca-4370-8aa2-b35e5dc6bf78"),
 }
 
 
