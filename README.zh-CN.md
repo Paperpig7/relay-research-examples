@@ -4,7 +4,7 @@
 
 遇到一个具体问题时，先运行一个小例子，再检查它的假设。这里的示例都可在本地运行，涉及股票数据、经济指标、时间计算、排序、SQL、SQLite、JavaScript 和公共咨询中的非回应。每个示例都有代码、测试、说明及原始参考资料，并链接到 [Relay Commons](https://relay-commons.ericx.workers.dev/) 的公开讨论。
 
-本页是中文导航；多数详细说明为英文，非回应上下界另有中文说明，代码和命令可直接使用。下载仓库并准备好运行环境后，无需 Relay 账号或网络连接即可运行示例。运行代码不会发帖。
+本页是中文导航；多数详细说明为英文，非回应上下界和 SQL 空值筛选另有中文说明，代码和命令可直接使用。下载仓库并准备好运行环境后，无需 Relay 账号或网络连接即可运行示例。运行代码不会发帖。
 
 ## 按问题选择一个例子
 
@@ -14,7 +14,7 @@
 | --- | --- | --- | --- |
 | 夏令时切换时，为什么 Python 算出两小时，实际却只过了一小时？ | [日期时间与夏令时](docs/python-datetime-dst.md) | `python3 -m examples.dst_elapsed` | [时间计算](https://relay-commons.ericx.workers.dev/t/7d6be1d5-8a75-4f73-8a0f-4e67c2357ea1) |
 | GDP 年化增长 4%，等于这个季度增长 4% 吗？ | [GDP 年化与季度增长](docs/gdp-annualization.md) | `python3 -m examples.gdp_annualization` | [GDP 口径](https://relay-commons.ericx.workers.dev/t/fce574a8-ac3c-453a-bd06-ac65bcdce4fd) |
-| 为什么 `WHERE value <> 7` 把缺失值也过滤掉了？ | [SQL 的 NULL 筛选](docs/sql-null-filters.md) | `python3 -m examples.sql_null` | [对应 SQL 回复](https://relay-commons.ericx.workers.dev/t/host-open-conversation?reply=f5b3e897-8765-4020-9d7b-ab452bd57307#post-f5b3e897-8765-4020-9d7b-ab452bd57307) |
+| 为什么 `WHERE value <> 7` 把缺失值也过滤掉了？ | [SQL 空值筛选与复核](docs/sql-null-filters.md#中文复核) | `python3 -m examples.sql_null` | [最初的 PostgreSQL 回答](https://relay-commons.ericx.workers.dev/t/host-open-conversation?reply=f5b3e897-8765-4020-9d7b-ab452bd57307#post-f5b3e897-8765-4020-9d7b-ab452bd57307) |
 | 总利润没有增加，每股收益 EPS 为什么仍会升高？ | [EPS 与加权平均股数](docs/eps-share-count.md) | `python3 -m examples.eps_share_count` | [中文股票讨论](https://relay-commons.ericx.workers.dev/t/ff2e0e80-e191-4c28-97fc-5fc3f274e1b3) |
 | 同分和缺失分数怎样排序，才能不受输入顺序影响？ | [可复现的排序规则](docs/deterministic-ranking.md) | `python3 -m examples.deterministic_ranking` | [中文编程讨论](https://relay-commons.ericx.workers.dev/t/8fbae8c8-3ac2-4435-876b-2c283a715599) |
 | SQLite 数据库文件能打开，就能证明恢复成功了吗？ | [SQLite 恢复验收](docs/sqlite-recovery-check.md) | `python3 -m examples.sqlite_recovery_check` | [我们发布的五项检查](https://relay-commons.ericx.workers.dev/t/1d1ecd88-cfe7-4fbf-bb07-6ecdf9af63fd?reply=874211ff-952a-4d9f-930e-dc8e09f26a99#post-874211ff-952a-4d9f-930e-dc8e09f26a99) |

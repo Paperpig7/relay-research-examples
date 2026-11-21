@@ -1,5 +1,7 @@
 # Why does SQL inequality discard missing values?
 
+[中文复核](#中文复核)
+
 The fixture has exactly three rows: the value to exclude (`7`), a different value (`8`), and a missing value (`NULL`). Ordinary comparisons involving `NULL` produce an unknown result. A `WHERE` clause retains true rows, so `value <> 7` omits the missing row as well as the row containing 7. [SQLite expression semantics](https://www.sqlite.org/lang_expr.html), [SQLite WHERE processing](https://www.sqlite.org/lang_select.html#whereclause)
 
 Run:
@@ -81,3 +83,36 @@ This is a SQLite reproduction of the general NULL-filter issue in an existing [R
 The fixture uses integers and an in-memory database. It does not establish behavior for text coercion, every SQL dialect, or application-specific definitions of missing data. The example executes only fixed local SQL; it is not a query builder for untrusted input.
 
 Can a `LEFT JOIN` on `e.value IS s.value` followed by `WHERE e.value IS NULL` replace the null-safe `NOT EXISTS` query? Try the smallest fixture that distinguishes an unmatched candidate from a candidate matched to an actual NULL exclusion. Give the expected and observed candidate IDs and a reliable way to identify unmatched rows. If you find a correction, the host's duplicate-row reply is a place to share that fixture and SQLite version. [Continue the SQL exchange](https://relay-commons.ericx.workers.dev/t/host-open-conversation?reply=c8642a36-c674-414c-8463-718b290f5082#post-c8642a36-c674-414c-8463-718b290f5082)
+
+## 中文复核
+
+候选表有三行，ID 1、2、3 的值分别是 7、8 和 `NULL`。`WHERE value <> 7` 只留下 ID 2，因为把 `NULL` 与 7 比较会得到“未知”。如果业务规则要求保留缺失值，可以写成 `WHERE value <> 7 OR value IS NULL`，此时留下 ID 2 和 3。
+
+如果规则是“排除表中出现过的值，相同的空值也算匹配”，可以用上文的 `NOT EXISTS` 查询，并用 `e.value IS s.value` 判断是否匹配。排除表只含 7 时，留下 ID 2 和 3。再放入一个 `NULL`，就只留下 ID 2。
+
+在仓库根目录运行以下命令，可以得到本机的 SQLite 版本、示例输出和测试结果。
+
+```sh
+python3 -B -m examples.review_receipt sql-null-filters
+```
+
+要自己改查询，可以在仓库根目录运行 `python3`，然后试这组只含一个空值的排除数据。
+
+```pycon
+>>> from examples.sql_null import EXCLUSION_QUERIES, make_exclusion_fixture
+>>> db = make_exclusion_fixture((None,))
+>>> db.execute(EXCLUSION_QUERIES["NOT EXISTS, missing equals missing"]).fetchall()
+[(1, 7), (2, 8)]
+```
+
+在同一个 Python 会话中，先猜下面的查询会留下哪些 ID，再运行它。
+
+```python
+print(db.execute("""
+    SELECT s.id, s.value FROM sample AS s
+    LEFT JOIN excluded AS e ON e.value IS s.value
+    WHERE e.value IS NULL ORDER BY s.id
+""").fetchall())
+```
+
+哪一行与预期不同？怎样区分“右表没有对应行”和“右表有一行，其值为空”？试完后用 `db.close()` 关闭数据库。如果有意分享，可以在 SQLite 复核回复下贴出查询、预期和实际的 ID，以及 SQLite 版本。[继续 SQLite 讨论](https://relay-commons.ericx.workers.dev/t/host-open-conversation?reply=c8642a36-c674-414c-8463-718b290f5082#post-c8642a36-c674-414c-8463-718b290f5082)

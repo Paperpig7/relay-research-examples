@@ -49,6 +49,14 @@ class ReviewReceiptTests(unittest.TestCase):
                         self.assertEqual(command[-2:], [receipt.EXAMPLES[example_id][1], "-v"])
         self.assertEqual(run.call_count, 2 * len(receipt.EXAMPLES) + 1)  # One extra Node version probe.
 
+    def test_sql_receipt_links_to_the_review_invitation_in_both_languages(self):
+        result = receipt.make_receipt("sql-null-filters")
+        self.assertEqual(result["status"], "passed")
+        guide = (receipt.ROOT / "docs/sql-null-filters.md").read_text(encoding="utf-8")
+        for label in ("Continue the SQL exchange", "继续 SQLite 讨论"):
+            with self.subTest(label=label):
+                self.assertIn(f"[{label}]({result['discussion_url']})", guide)
+
     def test_unknown_id_never_executes(self):
         with patch.object(receipt, "run_command") as run:
             with self.assertRaises(ValueError):
