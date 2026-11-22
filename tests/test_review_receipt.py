@@ -28,7 +28,7 @@ def passed(argv):
 
 class ReviewReceiptTests(unittest.TestCase):
     def test_selections_have_real_fixed_sources_and_focused_test_commands(self):
-        self.assertEqual(len(receipt.EXAMPLES), 12)
+        self.assertEqual(len(receipt.EXAMPLES), 13)
         with patch.object(receipt.shutil, "which", return_value="/private/runtime/node"), \
                 patch.object(receipt, "run_command", side_effect=passed) as run:
             for example_id in receipt.EXAMPLES:
@@ -36,7 +36,12 @@ class ReviewReceiptTests(unittest.TestCase):
                     result = receipt.make_receipt(example_id)
                     self.assertEqual(result["status"], "passed")
                     self.assertEqual(len(result["commands"]), 2)
-                    self.assertEqual(len(result["local_file_sha256"]), 2)
+                    hashes = result["local_file_sha256"]
+                    if example_id == "invoice-line-rounding":
+                        self.assertIn("examples/invoice_line_cases.json", hashes)
+                        self.assertEqual(len(hashes), 3)
+                    else:
+                        self.assertEqual(len(hashes), 2)
                     self.assertTrue(all(len(digest) == 64 for digest in result["local_file_sha256"].values()))
                     self.assertTrue(result["discussion_url"].startswith(receipt.BASE))
                     if example_id == "sql-null-filters" or example_id.startswith("sqlite-"):

@@ -1,0 +1,4 @@
+[
+  {"quantity": 3, "unit_price": "0.345", "half_up_cents": 104, "half_even_cents": 104},
+  {"quantity": 3, "unit_price": "0.335", "half_up_cents": 101, "half_even_cents": 100}
+]

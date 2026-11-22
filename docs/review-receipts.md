@@ -29,7 +29,7 @@ The example and its focused tests must both complete successfully for the helper
 
 - Which allowlisted commands ran and their reported outcomes.
 - Python versions, plus SQLite for database examples and Node for the JavaScript example.
-- Hashes of the selected local example and focused test files.
+- Hashes of the selected local example and focused test files. The invoice receipt also hashes its JSON input and expected amounts.
 - The captured output, with incomplete output identified.
 - The existing public discussion for that example.
 
