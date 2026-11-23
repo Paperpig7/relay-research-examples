@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 import sqlite3
 import sys
+import textwrap
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
@@ -17,8 +18,8 @@ def passed(argv):
         output = "v24.0.0\n"
     elif "--test" in argv:
         output = "# Subtest: first check\n# Subtest: second check\n# Subtest: third check\n# tests 3\n# pass 3\n# skipped 0\n"
-    elif "unittest" in argv:
-        output = "Ran 3 tests in 0.001s\n\nOK\n"
+    elif "examples._receipt_unittest" in argv:
+        output = "receipt-unittest-v1 3 3 0\n"
     else:
         output = "ok\n"
     return {"argv": ["runtime"] + argv[1:], "status": "passed", "exit_code": 0,
@@ -51,7 +52,7 @@ class ReviewReceiptTests(unittest.TestCase):
                     if example_id.startswith("javascript"):
                         self.assertEqual(command[1:], ["--test", expected_test])
                     else:
-                        self.assertEqual(command[-2:], [receipt.EXAMPLES[example_id][1], "-v"])
+                        self.assertEqual(command[-2:], ["examples._receipt_unittest", example_id])
         self.assertEqual(run.call_count, 2 * len(receipt.EXAMPLES) + 1)  # One extra Node version probe.
 
     def test_sql_receipt_links_to_the_review_invitation_in_both_languages(self):
@@ -156,8 +157,6 @@ class ReviewReceiptTests(unittest.TestCase):
 
     def test_successful_process_without_executed_tests_is_not_a_pass(self):
         cases = [
-            (False, "Ran 0 tests in 0.001s\n\nOK\n", "no_tests_executed"),
-            (False, "Ran 3 tests in 0.001s\n\nOK (skipped=3)\n", "no_tests_executed"),
             (False, "done", "test_count_unverified"),
             (True, "# tests 0\n# pass 0\n# skipped 0\n", "no_tests_executed"),
             (True, "# tests 3\n# pass 0\n# skipped 3\n", "no_tests_executed"),
@@ -171,12 +170,62 @@ class ReviewReceiptTests(unittest.TestCase):
                 self.assertEqual(result["status"], status)
                 self.assertEqual(result["exit_code"], 0)
 
-    def test_partial_skips_are_counted_as_not_executed(self):
-        result = dict(passed(["python", "tests"]), stdout="Ran 5 tests in 0.001s\n\nOK (skipped=2)\n")
-        receipt.validate_test_summary(result, javascript=False)
-        self.assertEqual(result["status"], "passed")
-        self.assertEqual(result["tests_executed"], 3)
-        self.assertEqual(result["tests_skipped"], 2)
+    def test_real_python_case_accounting(self):
+        fixtures = [
+            ("empty", "pass", "no_tests_executed", (0, 0, 0, 0)),
+            ("skipped setup", """
+                class SkipSetup(T):
+                    @classmethod
+                    def setUpClass(cls): raise unittest.SkipTest("fixture")
+                    def test_a(self): pass
+                class Other(T):
+                    def test_b(self): pass
+            """, "passed", (1, 1, 0, 1)),
+            ("skip per case", """
+                class Cases(T):
+                    @unittest.skip("skipped")
+                    def test_a(self): pass
+                    def test_b(self): pass
+            """, "passed", (2, 1, 1, 1)),
+            ("only skipped subtests", """
+                class Cases(T):
+                    def test_a(self):
+                        for i in range(2):
+                            with self.subTest(i=i): self.skipTest("skipped")
+            """, "no_tests_executed", (1, 2, 1, 0)),
+            ("mixed subtests", """
+                class Cases(T):
+                    def test_a(self):
+                        with self.subTest(i=1): self.skipTest("skipped")
+                        with self.subTest(i=2): self.assertEqual(2, 2)
+            """, "passed", (1, 1, 0, 1)),
+            ("expected failure", """
+                class Cases(T):
+                    @unittest.expectedFailure
+                    def test_a(self): self.fail("expected")
+            """, "passed", (1, 0, 0, 1)),
+            ("failure", """
+                class Cases(T):
+                    def test_a(self): self.fail("unexpected")
+            """, "failed", None),
+        ]
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "examples").mkdir()
+            (root / "tests").mkdir()
+            for name in ["_receipt_unittest.py", "review_receipt.py", "gdp_annualization.py"]:
+                shutil.copy(receipt.ROOT / "examples" / name, root / "examples" / name)
+            for name, fixture, status, counts in fixtures:
+                with self.subTest(name=name), patch.object(receipt, "ROOT", root):
+                    (root / "tests/test_gdp_annualization.py").write_text(
+                        "import unittest\nT = unittest.TestCase\n" + textwrap.dedent(fixture))
+                    result = receipt.make_receipt("gdp-annualization")
+                    command = result["commands"][1]
+                    self.assertEqual(command["status"], status, command)
+                    self.assertEqual(result["status"], "passed" if status == "passed" else "failed")
+                    if counts is not None:
+                        self.assertEqual(tuple(command[k] for k in
+                                               ("tests_reported", "tests_skipped", "test_cases_skipped", "tests_executed")), counts)
 
     @unittest.skipUnless(shutil.which("node"), "Node unavailable for real empty-file regression")
     def test_real_empty_node_test_file_is_not_a_successful_test_receipt(self):

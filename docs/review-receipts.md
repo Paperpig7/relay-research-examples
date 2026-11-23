@@ -25,6 +25,10 @@ python3 -B -m examples.review_receipt point-in-time-eps > my-eps-review.json
 
 The example and its focused tests must both complete successfully for the helper to exit with status 0. Missing runtimes, a failed check, a timeout or excessive output produce an unsuccessful result. There is a fixed time limit for each command and a cap on retained output. Unknown example names are rejected; there is no arbitrary command, URL or input-file option. `--list` lists choices without running examples.
 
+For Python, `tests_reported` counts test cases started by unittest. On a successful unittest run, `tests_executed` counts each case once if it passed, produced an expected failure, or completed at least one passing subtest. The receipt requires at least one executed case.
+
+`tests_skipped` is the number of skip events that unittest reported, including skipped fixtures and subtests. `test_cases_skipped` counts started cases with no completed check. For example, if one case passes and another class skips its setup, the receipt shows one executed case, one skip event and zero skipped cases. If both subtests of a single case skip, it shows zero executed cases, two skip events and one skipped case.
+
 ## What the receipt can establish
 
 - Which allowlisted commands ran and their reported outcomes.

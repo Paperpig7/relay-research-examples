@@ -157,7 +157,7 @@ def make_receipt(example_id):
         if module in {"sql_null", "sqlite_recovery_check", "sqlite_lost_ack", "sqlite_integer_scores"}:
             receipt["runtime_versions"]["sqlite"] = sqlite3.sqlite_version
         commands = [[sys.executable, "-B", "-m", "examples." + module],
-                    [sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests", "-p", test_name, "-v"]]
+                    [sys.executable, "-B", "-m", "examples._receipt_unittest", example_id]]
     receipt["commands"] = [run_command(command) for command in commands]
     validate_test_summary(receipt["commands"][1], javascript=javascript)
     receipt["status"] = "passed" if all(r["status"] == "passed" for r in receipt["commands"]) else "failed"
@@ -190,14 +190,17 @@ def validate_test_summary(result, *, javascript):
                           tests_reported=total, tests_skipped=skipped, tests_executed=0)
             return
     else:
-        counts = re.findall(r"^Ran (\d+) tests? in [^\n]+$", output, re.MULTILINE)
-        if not counts:
+        # The fixed runner writes its trailer after unittest finishes successfully.
+        lines = result["stdout"].splitlines()
+        counts = re.fullmatch(r"receipt-unittest-v1 (\d+) (\d+) (\d+)", lines[-1]) if lines else None
+        if counts is None:
             result["status"] = "test_count_unverified"
             return
-        total = int(counts[-1])
-        skips = re.findall(r"^OK \([^\n]*skipped=(\d+)[^\n]*\)$", output, re.MULTILINE)
-        skipped = int(skips[-1]) if skips else 0
-        executed = total - skipped
+        total, executed, skipped = map(int, counts.groups())
+        if executed > total:
+            result["status"] = "test_count_unverified"
+            return
+        result["test_cases_skipped"] = total - executed
     result.update(tests_reported=total, tests_skipped=skipped, tests_executed=executed)
     if total <= 0 or executed <= 0 or executed > total:
         result["status"] = "no_tests_executed"
