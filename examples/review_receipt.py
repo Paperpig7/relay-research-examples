@@ -110,7 +110,7 @@ def make_receipt(example_id):
     javascript = example_id == "javascript-json-string-validation"
     sources = ["examples/" + module + (".mjs" if javascript else ".py"), "tests/" + test_name]
     if example_id == "invoice-line-rounding":
-        sources.append("examples/invoice_line_cases.json")
+        sources.extend(["examples/invoice_line_cases.json", "examples/invoice_subtotal_cases.json"])
     receipt = {
         "schema_version": 1,
         "example_id": example_id,

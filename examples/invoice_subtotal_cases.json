@@ -1,0 +1,15 @@
+{
+  "split": {
+    "lines": [
+      {"quantity": 3, "unit_price": "0.345"},
+      {"quantity": 3, "unit_price": "0.345"}
+    ],
+    "expected": {"line_cents": [104, 104], "subtotal_cents": 208}
+  },
+  "merged": {
+    "lines": [
+      {"quantity": 6, "unit_price": "0.345"}
+    ],
+    "expected": {"line_cents": [207], "subtotal_cents": 207}
+  }
+}

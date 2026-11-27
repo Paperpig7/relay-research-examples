@@ -40,7 +40,8 @@ class ReviewReceiptTests(unittest.TestCase):
                     hashes = result["local_file_sha256"]
                     if example_id == "invoice-line-rounding":
                         self.assertIn("examples/invoice_line_cases.json", hashes)
-                        self.assertEqual(len(hashes), 3)
+                        self.assertIn("examples/invoice_subtotal_cases.json", hashes)
+                        self.assertEqual(len(hashes), 4)
                     else:
                         self.assertEqual(len(hashes), 2)
                     self.assertTrue(all(len(digest) == 64 for digest in result["local_file_sha256"].values()))
